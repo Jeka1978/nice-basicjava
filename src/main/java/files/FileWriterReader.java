@@ -1,6 +1,7 @@
 package files;
 
 import java.io.*;
+import java.util.HashMap;
 
 /**
  * Created by Jeka on 20/06/2016.

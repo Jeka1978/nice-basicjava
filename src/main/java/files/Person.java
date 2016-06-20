@@ -12,7 +12,12 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Person implements Serializable{
+public class Person implements Serializable, Comparable<Person>{
     private String name;
     private transient int age;
+
+    @Override
+    public int compareTo(Person person) {
+        return this.name.compareTo(person.name);
+    }
 }

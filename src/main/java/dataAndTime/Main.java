@@ -1,8 +1,6 @@
 package dataAndTime;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
@@ -11,6 +9,8 @@ import java.time.temporal.ChronoUnit;
  */
 public class Main {
     public static void main(String[] args) {
+//        LocalDate
+//        LocalTime
         LocalDateTime now = LocalDateTime.now();
         ZoneId losAngeles = ZoneId.of("America/Los_Angeles");
         ZonedDateTime losAnfelesDateTime = ZonedDateTime.of(now, losAngeles);
