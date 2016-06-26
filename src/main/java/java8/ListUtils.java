@@ -24,7 +24,7 @@ public class ListUtils {
        });
         /* for (T t : list) {
             consumer.accept(t);
-            Thread.sleep(delay);
+            Thread.sleep(repeat);
         }*/
     }
 
