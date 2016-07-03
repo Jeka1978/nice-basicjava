@@ -13,7 +13,6 @@ public class MaamServiceImpl implements MaamService {
     private MaamServiceImpl(){
         System.out.println("I was created");
     }
-    @Override
     public double getMaam() {
         return 0.18;
     }
