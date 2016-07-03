@@ -10,7 +10,8 @@ public class JavaConfig implements Config {
     private Map<Class, Class> ifc2Class = new HashMap<>();
 
     public JavaConfig() {
-        ifc2Class.put(Speaker.class, PopupSpeaker.class);
+        ifc2Class.put(Speaker.class, ConsoleSpeaker.class);
+        ifc2Class.put(Cleaner.class, PowerCleaner.class);
 
     }
 
