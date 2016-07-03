@@ -2,6 +2,8 @@ package mySpring;
 
 import org.reflections.Reflections;
 
+import java.lang.reflect.Field;
+import java.util.Random;
 import java.util.Set;
 
 /**
@@ -34,7 +36,32 @@ public class ObjectFactory {
             }
         }
         T t = type.newInstance();
-        // I can do some magic here
+
+        Field[] fields = type.getDeclaredFields();
+        for (Field field : fields) {
+            if (field.isAnnotationPresent(InjectRandomInt.class)) {
+                InjectRandomInt annotation = field.getAnnotation(InjectRandomInt.class);
+                Random random = new Random();
+                int min = annotation.min();
+                int max = annotation.max();
+                int value = min + random.nextInt(max - min);
+                field.setAccessible(true);
+                field.set(t,value);
+
+            }
+        }
+
         return t;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
