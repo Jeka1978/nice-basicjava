@@ -9,23 +9,13 @@ import java.lang.reflect.Proxy;
  */
 public class Main {
     public static void main(String[] args) throws IllegalAccessException, InstantiationException, FileNotFoundException, InvocationTargetException {
+/*
         IRobot iRobot = ObjectFactory.getInstance().createObject(IRobot.class);
         iRobot.cleanRoom();
-        System.out.println("iRobot = " + iRobot);
-       /* Elf elf = ObjectFactory.getInstance().createObject(Elf.class);
-        System.out.println("elf = " + elf);*/
-        CleanerImpl cleaner = new CleanerImpl();
-        Cleaner o = (Cleaner) Proxy.newProxyInstance(ClassLoader.getSystemClassLoader(),
-                CleanerImpl.class.getInterfaces(), (proxy, method, args1) -> {
-                    System.out.println(12);
-                    System.out.println(12);
-                    System.out.println(12);
-                    System.out.println(12);
-                    return false;
-                });
+*/
 
-        System.out.println("@!$!@#!@#!@#");
-        o.clean();
-        System.out.println(o.equals(cleaner));
+        MyService myService = ObjectFactory.getInstance().createObject(MyService.class);
+        myService.doWork();
+        myService.drinkBeer();
     }
 }
