@@ -2,10 +2,10 @@ package mySpring;
 
 import org.reflections.Reflections;
 
+import javax.annotation.PostConstruct;
 import java.io.FileNotFoundException;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.util.*;
 
 /**
@@ -37,11 +37,39 @@ public class ObjectFactory {
     }
 
 
-    public <T> T createObject(Class<T> type) throws FileNotFoundException, IllegalAccessException, InstantiationException {
+    public <T> T createObject(Class<T> type) throws FileNotFoundException, IllegalAccessException, InstantiationException, InvocationTargetException {
         type = resolveImpl(type);
         T t = type.newInstance();
         configure(t);
+        invokeInitMethod(type, t);
+
+        if (type.isAnnotationPresent(Benchmark.class)) {
+            return (T) Proxy.newProxyInstance(type.getClassLoader(), type.getInterfaces(), new InvocationHandler() {
+                @Override
+                public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                    System.out.println("*********BECHMARK*************");
+                    System.out.println(method.getName());
+                    long before = System.nanoTime();
+                    Object retVal = method.invoke(t, args);
+                    long after = System.nanoTime();
+                    System.out.println("End of benchmark for method "+method.getName()+" "+(after-before)+" nanos");
+                    return retVal;
+                }
+            });
+        }
+
+
+
         return t;
+    }
+
+    private <T> void invokeInitMethod(Class<T> type, T t) throws IllegalAccessException, InvocationTargetException {
+        Method[] methods = type.getMethods();
+        for (Method method : methods) {
+            if (method.isAnnotationPresent(PostConstruct.class)) {
+                method.invoke(t);
+            }
+        }
     }
 
 
@@ -81,7 +109,7 @@ public class ObjectFactory {
         return type;
     }
 
-    private <T> void configure(T t) throws IllegalAccessException, FileNotFoundException, InstantiationException {
+    private <T> void configure(T t) throws IllegalAccessException, FileNotFoundException, InstantiationException, InvocationTargetException {
         for (ObjectConfigurer objectConfigurer : objectConfigurers) {
             objectConfigurer.configure(t);
         }
