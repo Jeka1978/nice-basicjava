@@ -38,25 +38,36 @@ public class ObjectFactory {
 
 
     public <T> T createObject(Class<T> type) throws FileNotFoundException, IllegalAccessException, InstantiationException, InvocationTargetException {
-        type = resolveImpl(type);
-        T t = type.newInstance();
+        Class<T> impl = resolveImpl(type);
+        T t = impl.newInstance();
         configure(t);
-        invokeInitMethod(type, t);
-
-        if (type.isAnnotationPresent(Benchmark.class)) {
-            return (T) Proxy.newProxyInstance(type.getClassLoader(), type.getInterfaces(), new InvocationHandler() {
-                @Override
-                public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                    System.out.println("*********BECHMARK*************");
-                    System.out.println(method.getName());
-                    long before = System.nanoTime();
-                    Object retVal = method.invoke(t, args);
-                    long after = System.nanoTime();
-                    System.out.println("End of benchmark for method "+method.getName()+" "+(after-before)+" nanos");
-                    return retVal;
-                }
-            });
+        invokeInitMethod(impl, t);
+        Method[] methods = impl.getMethods();
+        for (Method method : methods) {
+            if (method.isAnnotationPresent(Benchmark.class)) {
+                return (T) Proxy.newProxyInstance(impl.getClassLoader(), impl.getInterfaces(), new InvocationHandler() {
+                    @Override
+                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                        Method classMethod = impl.getMethod(method.getName(), method.getParameterTypes());
+                        if (classMethod.isAnnotationPresent(Benchmark.class)) {
+                            System.out.println("*********BECHMARK*************");
+                            System.out.println(method.getName());
+                            long before = System.nanoTime();
+                            Object retVal = method.invoke(t, args);
+                            long after = System.nanoTime();
+                            System.out.println("End of benchmark for method "+method.getName()+" "+(after-before)+" nanos");
+                            return retVal;
+                        }else {
+                            return method.invoke(t, args);
+                        }
+                    }
+                });
+            }
         }
+
+
+
+
 
 
 
