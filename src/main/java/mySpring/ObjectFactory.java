@@ -119,6 +119,11 @@ public class ObjectFactory {
             objectConfigurer.configure(t);
         }
     }
+
+    public Object createObject(String className) throws Exception {
+        Class<?> type = Class.forName(className);
+        return createObject(type);
+    }
 }
 
 

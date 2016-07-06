@@ -9,7 +9,9 @@ import java.lang.reflect.Proxy;
  */
 public class Main {
     public static void main(String[] args) throws Exception {
-        IRobot iRobot = ObjectFactory.getInstance().createObject(IRobot.class);
+        ObjectFactory factory = ObjectFactory.getInstance();
+        IRobot iRobot = factory.createObject(IRobot.class);
+        Object object = factory.createObject("mySpring.IRobot");
         iRobot.cleanRoom();
 
         /*MyService myService = ObjectFactory.getInstance().createObject(MyService.class);
