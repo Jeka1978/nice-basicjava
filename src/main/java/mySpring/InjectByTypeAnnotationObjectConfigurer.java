@@ -9,7 +9,7 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class InjectByTypeAnnotationObjectConfigurer implements ObjectConfigurer {
     @Override
-    public void configure(Object t) throws IllegalAccessException, FileNotFoundException, InstantiationException, InvocationTargetException {
+    public void configure(Object t) throws Exception {
         Class<?> type = t.getClass();
         Field[] fields = type.getDeclaredFields();
         for (Field field : fields) {

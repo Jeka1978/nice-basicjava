@@ -3,8 +3,10 @@ package mySpring;
 /**
  * Created by Jeka on 03/07/2016.
  */
+
 public class MyServiceImpl implements MyService {
     @Override
+    @Transactional
     public void doWork() {
         System.out.println("Working....");
     }

@@ -15,6 +15,7 @@ public class ObjectFactory {
     private static ObjectFactory ourInstance = new ObjectFactory();
     private Config config = new JavaConfig();
     private List<ObjectConfigurer> objectConfigurers = new ArrayList<>();
+    private List<ProxyConfigurer> proxyConfigurers = new ArrayList<>();
     private Map<Class, Object> singletonCache = new HashMap<>();
 
     private Reflections reflections = new Reflections("mySpring");
@@ -34,45 +35,38 @@ public class ObjectFactory {
                 }
             }
         }
+        Set<Class<? extends ProxyConfigurer>> proxyConfigurersClasses = reflections.getSubTypesOf(ProxyConfigurer.class);
+        for (Class<? extends ProxyConfigurer> aClass : proxyConfigurersClasses) {
+            if (!Modifier.isAbstract(aClass.getModifiers())) {
+                try {
+                    proxyConfigurers.add(aClass.newInstance());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
     }
 
 
-    public <T> T createObject(Class<T> type) throws FileNotFoundException, IllegalAccessException, InstantiationException, InvocationTargetException {
+    public <T> T createObject(Class<T> type) throws Exception {
         Class<T> impl = resolveImpl(type);
         T t = impl.newInstance();
         configure(t);
         invokeInitMethod(impl, t);
-        Method[] methods = impl.getMethods();
-        for (Method method : methods) {
-            if (method.isAnnotationPresent(Benchmark.class)) {
-                return (T) Proxy.newProxyInstance(impl.getClassLoader(), impl.getInterfaces(), new InvocationHandler() {
-                    @Override
-                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                        Method classMethod = impl.getMethod(method.getName(), method.getParameterTypes());
-                        if (classMethod.isAnnotationPresent(Benchmark.class)) {
-                            System.out.println("*********BECHMARK*************");
-                            System.out.println(method.getName());
-                            long before = System.nanoTime();
-                            Object retVal = method.invoke(t, args);
-                            long after = System.nanoTime();
-                            System.out.println("End of benchmark for method "+method.getName()+" "+(after-before)+" nanos");
-                            return retVal;
-                        }else {
-                            return method.invoke(t, args);
-                        }
-                    }
-                });
-            }
+        for (ProxyConfigurer proxyConfigurer : proxyConfigurers) {
+            t = (T) proxyConfigurer.wrapWithProxy(t,impl);
         }
-
-
-
-
-
-
 
         return t;
     }
+
+
+
+
+
+
+
+
 
     private <T> void invokeInitMethod(Class<T> type, T t) throws IllegalAccessException, InvocationTargetException {
         Method[] methods = type.getMethods();
@@ -120,7 +114,7 @@ public class ObjectFactory {
         return type;
     }
 
-    private <T> void configure(T t) throws IllegalAccessException, FileNotFoundException, InstantiationException, InvocationTargetException {
+    private <T> void configure(T t) throws Exception {
         for (ObjectConfigurer objectConfigurer : objectConfigurers) {
             objectConfigurer.configure(t);
         }
